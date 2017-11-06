@@ -1,0 +1,11 @@
+uint8 opcode
+string data
+---
+uint8 success_flag
+string result
+
+uint8 FAIL = 0
+uint8 SUCCESS = 1
+uint8 TIMEOUT = 2
+uint8 REQUEST_ERROR = 3
+uint8 UNKNOWN_VALUE_ERROR = 4
