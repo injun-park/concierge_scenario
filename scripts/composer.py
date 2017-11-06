@@ -64,14 +64,14 @@ class ScenarioComposer :
 
 
     def welcomeStage(self):
-        self.tts.speak("음. 안녕하세요. 저는 안내로봇이라고 해요.")
-        self.tts.speak("음. 저와 이야기 하고 싶으면, '안녕' 이라고 말씀해 주세요.")
+        self.tts.speak("안녕하세요. 저는 안내로봇이라고 해요. 만나서 반갑습니다.")
+        self.tts.speak("저와 이야기 하고 싶으면, '안녕' 이라고 말씀해 주세요.")
         result = self.recogSpeech()
         sentence = result.sentence.replace(' ', '')
         if(sentence == '안녕') :
             print "ok"
-        self.tts.speak("음. 저는 Navigation기능을 통해, 장소를 안내 할 수 있고, 장소에 대한 정보를 전달 할 수 있습니다.")
-        self.tts.speak("음. 장소 안내를 받고 싶으면 '장소안내' 라고 말씀해 주시고, 건물에 대한 정보를 알고 싶으면, '장소정보' 라고 말씀해 주세요")
+        self.tts.speak("저는 Navigation기능을 통해, 장소를 안내 할 수 있고, 장소에 대한 정보를 전달 할 수 있습니다.")
+        self.tts.speak("장소 안내를 받고 싶으면 '장소안내' 라고 말씀해 주시고, 건물에 대한 정보를 알고 싶으면, '장소정보' 라고 말씀해 주세요")
         result = self.stt.recognize()
         rospy.loginfo("sentence : " + str(result.sentence) + ", flag : " + str(result.success_flag))
 

@@ -64,7 +64,6 @@ class SpeechRecognizer :
             self.queue.put(result)
             print("Could not request results from Google Speech Recognition service; {0}".format(e))
 
-        #self.stopListening()
 
     def recognize(self):
         rospy.loginfo("speech recognizer triggered")
@@ -93,6 +92,10 @@ class SpeechRecognizer :
             self.queue.put(result)
 
         result = self.queue.get()
+        self.stopListening()
+
+        rospy.loginfo("SpeechRecognition : stopListening activated")
+
         return result
 
 
