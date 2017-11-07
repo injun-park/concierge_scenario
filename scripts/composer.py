@@ -64,8 +64,7 @@ class ScenarioComposer :
 
 
     def welcomeStage(self):
-        self.tts.speak("안녕하세요. 저는 안내로봇이라고 해요. 만나서 반갑습니다.")
-        self.tts.speak("저와 이야기 하고 싶으면, '안녕' 이라고 말씀해 주세요.")
+        self.tts.speak("안녕하세요. 저와 이야기 하고 싶으면, '안녕' 이라고 말씀해 주세요.")
         result = self.recogSpeech()
         sentence = result.sentence.replace(' ', '')
         if(sentence == '안녕') :
