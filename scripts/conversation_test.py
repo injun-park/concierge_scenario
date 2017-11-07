@@ -13,7 +13,6 @@ def recogSpeech(tts, stt):
     RECOG_LIMIT = 3
     recogTrial = 0
     while recogTrial < RECOG_LIMIT:
-        print "1111111"
         result = stt.recognize()
         rospy.loginfo("sentence : " + str(result.sentence) + ", flag : " + str(result.success_flag))
 
@@ -29,10 +28,11 @@ def recogSpeech(tts, stt):
 def getConversationResult(tts, stt, conversation) :
     sr_result = recogSpeech(tts, stt)
     conv_result = conversation.getResponse(sr_result.sentence)
-    response_sentence = conv_result['output']['text'][0]
-    response_sentence = response_sentence.replace(' ', '')
-    tts.speak(response_sentence)
+    response_sentences = conv_result['output']['text']
+    for sentence in response_sentences :
+        tts.speak(sentence)
     return conv_result
+
 
 
 if __name__ == "__main__" :

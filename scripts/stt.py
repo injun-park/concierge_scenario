@@ -83,7 +83,9 @@ class SpeechRecognizer :
         while self.queue.empty() and loop_count < LOOP_COUNT_LIMIT :
             rospy.sleep(sample_duration)
             loop_count += 1
+            rospy.loginfo("listening loop count : " + str(loop_count))
         self.stopListening()
+        rospy.loginfo("stt:stoplistening triggered")
         if(self.queue.empty()) :
             rospy.logwarn("speech recognition time out")
             result = SpeechResult()
