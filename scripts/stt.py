@@ -46,8 +46,8 @@ class SpeechRecognizer :
             result = SpeechResult()
             result.success_flag = result.SUCCESS
             result.sentence = user_sentence.encode('utf8')
-
             self.queue.put(result)
+            print "stt result pushed"
 
         except sr.UnknownValueError:
 

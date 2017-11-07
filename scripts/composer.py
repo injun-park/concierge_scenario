@@ -3,9 +3,11 @@
 
 
 import rospy
+import json
 from TTS import  TTS
 from stt import SpeechRecognizer
-from user_detection.msg import  UserDetectionMsg
+from conversation.conversation import Conversation
+#from user_detection.msg import  UserDetectionMsg
 
 
 
@@ -34,8 +36,9 @@ class UserDetector :
         return False
 
     def startDetection(self):
-        self._userDetectorSubscriber = rospy.Subscriber('/distance_filter/data', UserDetectionMsg,
-                                                        self.userDetectedCallback)
+        # self._userDetectorSubscriber = rospy.Subscriber('/distance_filter/data', UserDetectionMsg,
+        #                                                 self.userDetectedCallback)
+        return True
 
     def stopDetection(self):
         self._userDetectorSubscriber.unregister()
@@ -49,30 +52,57 @@ class UserDetector :
             continue
 
 
+
+
 class ScenarioComposer :
     def __init__(self):
-        self.userDetector = UserDetector()
-        self.userDetector.startDetection()
+        # self.userDetector = UserDetector()
+        # self.userDetector.startDetection()
 
         self.tts = TTS()
         self.stt = SpeechRecognizer()
+        self.conversation = Conversation()
+
+
+    def doScenario(self):
+
+        self.initState()
+        terminated = False
+        while terminated is not True :
+            response = self.getConversationResult()
+            response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
+            rospy.loginfo(response_formatted.encode('utf8'))
+
+            if self.checkShutdown(response) :
+                rospy.loginfo("shutdown flag triggered")
+                terminated = True
+            elif self.checkFinishFlag(response) :
+                self.initState()
+
+        rospy.loginfo("application terminated")
+
+
+    def checkFinishFlag(self, response):
+        try :
+            finish_flag = response['output']['finish_flag']
+            if finish_flag is not None and finish_flag == "true": return True
+        except KeyError as e :
+            return False
+
+    def checkShutdown(self, response):
+
+        try :
+            shutdown_flag = response['output']['need_shutdown']
+            if shutdown_flag is not None and shutdown_flag == "true": return True
+        except KeyError as e :
+            return False
+
 
 
     def initState(self):
-        self.userDetector.checkDetection()
-        self.tts.speak("사용자가 감지 되었습니다.")
+        #self.userDetector.checkDetection()
+        self.tts.speak("사용자가 감지 되었습니다. 저와 이야기 하고 싶으면 안녕이라고 말씀해주세요.")
 
-
-    def welcomeStage(self):
-        self.tts.speak("안녕하세요. 저와 이야기 하고 싶으면, '안녕' 이라고 말씀해 주세요.")
-        result = self.recogSpeech()
-        sentence = result.sentence.replace(' ', '')
-        if(sentence == '안녕') :
-            print "ok"
-        self.tts.speak("저는 Navigation기능을 통해, 장소를 안내 할 수 있고, 장소에 대한 정보를 전달 할 수 있습니다.")
-        self.tts.speak("장소 안내를 받고 싶으면 '장소안내' 라고 말씀해 주시고, 건물에 대한 정보를 알고 싶으면, '장소정보' 라고 말씀해 주세요")
-        result = self.stt.recognize()
-        rospy.loginfo("sentence : " + str(result.sentence) + ", flag : " + str(result.success_flag))
 
 
     def recogSpeech(self):
@@ -86,11 +116,21 @@ class ScenarioComposer :
         rospy.loginfo("sentence : " + str(result.sentence) +", flag : " + str(result.success_flag))
         return result
 
+    def getConversationResult(self):
+        rospy.loginfo("call speech recognition")
+        sr_result = self.recogSpeech()
+
+        rospy.loginfo("call aibril conversation")
+        conv_result = self.conversation.getResponse(sr_result.sentence)
+        response_sentences = conv_result['output']['text']
+        for sentence in response_sentences:
+            self.tts.speak(sentence)
+        return conv_result
+
 if __name__ == "__main__" :
     rospy.init_node('scenario_composer', anonymous=True)
     s = ScenarioComposer()
-    s.initState()
-    s.welcomeStage()
+    s.doScenario()
     rospy.spin()
 
 
