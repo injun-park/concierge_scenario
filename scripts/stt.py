@@ -26,9 +26,8 @@ class SpeechRecognizer :
         self.queue = Queue.Queue()
         self.TIMEOUT = 5.0
 
-        self.service = rospy.Service('/stt', sr_result, self.handle_request)
-        rospy.loginfo("SpeechRecognizer started")
-
+        #
+        # self.service = rospy.Service('/stt', sr_result, self.handle_request)
     def handle_request(self, request):
         self.recognize()
 

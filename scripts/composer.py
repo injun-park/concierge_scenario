@@ -1,19 +1,19 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-
+import sys
 import rospy
 import json
 from TTS import  TTS
 from stt import SpeechRecognizer
 from conversation.conversation import Conversation
-#from user_detection.msg import  UserDetectionMsg
+from user_detection.msg import  UserDetectionMsg
 
 
 
 class UserDetector :
 
-    __THRESHOLD_POINT_COUNT = 70000
+    __THRESHOLD_POINT_COUNT = 30000
 
     def __init__(self):
         self.detected = False
@@ -36,8 +36,7 @@ class UserDetector :
         return False
 
     def startDetection(self):
-        # self._userDetectorSubscriber = rospy.Subscriber('/distance_filter/data', UserDetectionMsg,
-        #                                                 self.userDetectedCallback)
+        self._userDetectorSubscriber = rospy.Subscriber('/distance_filter/data', UserDetectionMsg, self.userDetectedCallback)
         return True
 
     def stopDetection(self):
@@ -51,35 +50,19 @@ class UserDetector :
             rospy.sleep(duration)
             continue
 
+class CannotDetectUserException(Exception) :
+    def __init__(self):
+        self.value = "CannotDetecUserException"
 
+    def __str__(self):
+        return self.value
 
 
 class ScenarioComposer :
     def __init__(self):
-        # self.userDetector = UserDetector()
-        # self.userDetector.startDetection()
-
+        self.userDetector = UserDetector()
+        self.userDetector.startDetection()
         self.tts = TTS()
-        self.stt = SpeechRecognizer()
-        self.conversation = Conversation()
-
-
-    def doScenario(self):
-
-        self.initState()
-        terminated = False
-        while terminated is not True :
-            response = self.getConversationResult()
-            response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
-            rospy.loginfo(response_formatted.encode('utf8'))
-
-            if self.checkShutdown(response) :
-                rospy.loginfo("shutdown flag triggered")
-                terminated = True
-            elif self.checkFinishFlag(response) :
-                self.initState()
-
-        rospy.loginfo("application terminated")
 
 
     def checkFinishFlag(self, response):
@@ -90,18 +73,10 @@ class ScenarioComposer :
             return False
 
     def checkShutdown(self, response):
-
-        try :
-            shutdown_flag = response['output']['need_shutdown']
-            if shutdown_flag is not None and shutdown_flag == "true": return True
-        except KeyError as e :
-            return False
-
-
-
-    def initState(self):
-        #self.userDetector.checkDetection()
-        self.tts.speak("사용자가 감지 되었습니다. 저와 이야기 하고 싶으면 안녕이라고 말씀해주세요.")
+        entities = response['entities']
+        for entity in entities:
+            if entity['entity'] == "shutdown":
+                sys.exit(1)
 
 
 
@@ -109,7 +84,10 @@ class ScenarioComposer :
         result = None
         RECOG_LIMIT = 3
         recogTrial = 0
+        self.stt = SpeechRecognizer()
         while recogTrial < RECOG_LIMIT :
+            if not self.userDetector.isDetected() :
+                raise CannotDetectUserException()
             result = self.stt.recognize()
             if result.success_flag == result.SUCCESS : break
             self.tts.speak("음성인식에 실패 하였습니다. 다시 말씀 해 주세요")
@@ -117,15 +95,43 @@ class ScenarioComposer :
         return result
 
     def getConversationResult(self):
-        rospy.loginfo("call speech recognition")
-        sr_result = self.recogSpeech()
+        try :
+            sr_result = self.recogSpeech()
+            conv_result = self.conversation.getResponse(sr_result.sentence)
+            response_sentences = conv_result['output']['text']
+            for sentence in response_sentences:
+                self.tts.speak(sentence)
+            return conv_result
+        except CannotDetectUserException as e :
+            raise e
 
-        rospy.loginfo("call aibril conversation")
-        conv_result = self.conversation.getResponse(sr_result.sentence)
-        response_sentences = conv_result['output']['text']
-        for sentence in response_sentences:
-            self.tts.speak(sentence)
-        return conv_result
+    def initState(self):
+        self.conversation = Conversation()
+        self.userDetector.checkDetection()
+        rospy.loginfo("user detected")
+        self.tts.speak("사용자가 감지 되었습니다. 저와 이야기 하고 싶으면 안녕이라고 말씀해주세요.")
+
+    def doScenario(self):
+        rospy.loginfo("scenario started")
+        self.initState()
+        terminated = False
+        while terminated is not True :
+            try :
+                response = self.getConversationResult()
+                response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
+                rospy.loginfo(response_formatted.encode('utf8'))
+
+                self.checkShutdown(response)
+                if self.checkFinishFlag(response) :
+                    self.tts.speak(("현재 대화 세션을 종료 하고, 초기 상태로 돌아갑니다."))
+                    self.initState()
+
+            except CannotDetectUserException as e :
+                self.tts.speak("사용자가 사라졌습니다. 초기 상태로 돌아갑니다.")
+                self.initState()
+                print e
+
+        rospy.loginfo("application terminated")
 
 if __name__ == "__main__" :
     rospy.init_node('scenario_composer', anonymous=True)
