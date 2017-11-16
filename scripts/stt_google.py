@@ -159,12 +159,15 @@ def main():
 
         # Now, put the transcription responses to use.
         #listen_print_loop(responses)
+        result = ''
         for response in responses :
             result = response.results[0]
             transcript = result.alternatives[0].transcript
+            print "transcript : ", transcript
             if result.is_final :
                 print "final"
                 stream.__exit__(None, None, None)
+                result = transcript
 
 
 if __name__ == '__main__':
