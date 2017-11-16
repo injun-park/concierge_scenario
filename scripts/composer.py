@@ -6,10 +6,25 @@ import rospy
 import json
 from TTS import  TTS
 from stt import SpeechRecognizer
+from stt_block import STT_STATE
+from stt_block import STT_B
 from conversation.conversation import Conversation
 from user_detector import UserDetector
 from user_detector import CannotDetectUserException
 from ui_control import UI_Control
+
+
+class Composer :
+    def __init__(self): pass
+
+    def initState(self):
+        self.userDetector = UserDetector()
+        self.tts = TTS()
+        self.ui = UI_Control()
+        self.stt = STT_B()
+
+        self.userDetector.startDetection()
+
 
 
 class ScenarioComposer :
