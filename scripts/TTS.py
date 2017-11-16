@@ -54,3 +54,8 @@ class TTS :
     def speak(self, sentence):
         self.makeWAV(sentence, self.__TMP_FILE_PATH)
         self.playWAV(self.__TMP_FILE_PATH)
+
+if __name__ == "__main__" :
+    rospy.init_node("tts", anonymous=True)
+    tts = TTS()
+    tts.speak('안녕하시렵니까.')

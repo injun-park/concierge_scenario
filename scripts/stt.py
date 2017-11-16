@@ -4,6 +4,7 @@
 import time
 import rospy
 import Queue
+from urllib2 import Request, urlopen, URLError, HTTPError
 from concierge_scenario.srv import sr_result, sr_resultResponse, sr_resultRequest
 import speech_recognition as sr
 
@@ -19,29 +20,32 @@ class SpeechResult :
         self.success_flag = 0
         self.sentence = ''
 
-
 class SpeechRecognizer :
-    def __init__(self):
+
+    def __init__(self, stateCallback = None):
         self.stopListening = None
         self.queue = Queue.Queue()
         self.TIMEOUT = 5.0
+
+
+        self.stateCallback = stateCallback
 
         #
         # self.service = rospy.Service('/stt', sr_result, self.handle_request)
     def handle_request(self, request):
         self.recognize()
 
-
-
     def speechCallback(self, recognizer, audio):
+        rospy.loginfo("speech callback function called")
         # received audio data, now we'll recognize it using Google Speech Recognition
         try:
             # for testing purposes, we're just using the default API key
             # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
             # instead of `r.recognize_google(audio)`
+
+            recognizer.operation_timeout = 10
             user_sentence = recognizer.recognize_google(audio, language='ko-KR')
             print("Google Speech Recognition thinks you said " + user_sentence)
-
             result = SpeechResult()
             result.success_flag = result.SUCCESS
             result.sentence = user_sentence.encode('utf8')
@@ -49,11 +53,9 @@ class SpeechRecognizer :
             print "stt result pushed"
 
         except sr.UnknownValueError:
-
             result = SpeechResult()
             result.success_flag = result.UNKNOWN_VALUE_ERROR
             result.sentence = ''
-
             self.queue.put(result)
             print("Google Speech Recognition could not understand audio")
         except sr.RequestError as e:
@@ -62,7 +64,6 @@ class SpeechRecognizer :
             result.sentence = ''
             self.queue.put(result)
             print("Could not request results from Google Speech Recognition service; {0}".format(e))
-
 
     def recognize(self):
         rospy.loginfo("speech recognizer triggered")
@@ -83,6 +84,7 @@ class SpeechRecognizer :
             rospy.sleep(sample_duration)
             loop_count += 1
             rospy.loginfo("listening loop count : " + str(loop_count))
+        rospy.loginfo("listening loop fin.")
         self.stopListening()
         rospy.loginfo("stt:stoplistening triggered")
         if(self.queue.empty()) :
