@@ -1,0 +1,90 @@
+<html>
+<head>
+
+<title>Conversation Chat App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta property="og:image" content="conversation.svg" />
+<meta property="og:title" content="Conversation Chat Simple" />
+<meta property="og:description" content="Sample application that shows how to use the Conversation API to identify user intents" />
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="./css/app.css">
+<script src="node_modules/eventemitter2/lib/eventemitter2.js"></script>
+<script src="node_modules/roslib/build/roslib.js"></script>
+<script src="js/watson_ros.js"></script>
+
+<script language = "javascript">
+  function myKeydown(event, inputBox) {
+    //var inputBox = document.getElementById('textInput');
+    if (event.keyCode === 13 && inputBox.value) {
+      // console.log(inputBox.value);
+      // var myDiv = document.getElementById('scrollingChat');
+      // userSentenceHtml = makeUserSentenceHtml(inputBox.value);
+      // myDiv.innerHTML += userSentenceHtml;
+      // inputBox.value = "";
+      // myDiv.scrollTop = myDiv.scrollHeight;
+
+      sendText();
+    }
+  }
+
+
+  function sendText() {
+    var textbox = document.getElementById('textInput');
+    var msg = new ROSLIB.Message({
+        command : 4,
+        data : textbox.value
+      });
+
+    publisher.publish(msg);
+    textbox.value = "";
+
+  }
+
+  function clearChat() {
+    document.getElementById('scrollingChat').innerHTML = "";
+  }
+
+</script>
+</head>
+<body>
+  <div id="contentParent" class="responsive-columns-wrapper">
+    <div id="chat-column-holder" class="responsive-column content-column">
+      <div class="chat-column">
+        <div id="scrollingChat">
+        </div>
+        <label for="textInput" class="inputOutline">
+          <input id="textInput" class="input responsive-column"
+            placeholder="Type something" type="text" onkeydown="javascript:myKeydown(event, this)">
+            <!--
+            onkeydown="javascript:myKeydown(event, this)">
+            -->
+          <input type="button" id="btn_send" class="input responsive-column" value="send" onClick="javascript:sendText();"/>
+          <input type="button" id="btn_clear" class="input responsive-column" value="clear" onClick="javascript:clearChat();"/>
+        </label>
+        <div id="button layer">
+          <input type="button" value="finish app" style="width:200; height:100"/>
+        </div>
+
+        <div id="statusIndicator" style="margin-left:20px; margin-top:10px">
+        <p id="connecting">
+          Connecting to rosbridge...
+        </p>
+        <p id="connected" style="color:#00D600; display:none">
+          Connected
+        </p>
+        <p id="error" style="color:#FF0000; display:none">
+          Error in the backend!
+        </p>
+        <p id="closed" style="display:none">
+          Connection closed.
+        </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

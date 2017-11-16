@@ -1,0 +1,19 @@
+{
+  "name": "display.app",
+  "version": "0.1.0",
+  "description": "",
+  "main": "app.js",
+  "author": "robocare inc.,",
+  "packageNameTemplate": "{{name}}-v{{version}}-{{platform}}-{{arch}}",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "express": "^4.14.0",
+    "express-browserify": "^1.0.2",
+    "jquery": "^3.1.0",
+    "roslib": "git+https://github.com/RobotWebTools/roslibjs.git#develop",
+    "socket.io-client": "^1.4.8",
+    "virtual-keyboard": "^1.25.29",
+    "watson-developer-cloud": "^2.6.1",
+    "watson-speech": "^0.20.3"
+  }
+}
