@@ -37,6 +37,7 @@ if __name__ == "__main__" :
         response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
         print response_formatted
 
+
         try :
             finish_flag = response['output']['finish_flag']
         except KeyError as e :
