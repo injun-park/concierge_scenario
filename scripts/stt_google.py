@@ -38,9 +38,7 @@ class MicrophoneStream(object):
             # overflow while the calling thread makes network requests, etc.
             stream_callback=self._fill_buffer,
         )
-
         self.closed = False
-
         return self
 
     def __exit__(self, type, value, traceback):
@@ -81,61 +79,13 @@ class MicrophoneStream(object):
 # [END audio_stream]
 
 
-def listen_print_loop(responses):
-    """Iterates through server responses and prints them.
-    The responses passed is a generator that will block until a response
-    is provided by the server.
-    Each response may contain multiple results, and each result may contain
-    multiple alternatives; for details, see https://goo.gl/tjCPAU.  Here we
-    print only the transcription for the top alternative of the top result.
-    In this case, responses are provided for interim results as well. If the
-    response is an interim one, print a line feed at the end of it, to allow
-    the next result to overwrite it, until the response is a final one. For the
-    final one, print a newline to preserve the finalized transcription.
-    """
-    num_chars_printed = 0
-    for response in responses:
-        if not response.results:
-            continue
+class SpeechResult :
+    def __init__(self, transcript = None, confidence=None, isFinal = False):
+        self.transcript = transcript
+        self.confidence = confidence
+        self.isFinal = isFinal
 
-        # The `results` list is consecutive. For streaming, we only care about
-        # the first result being considered, since once it's `is_final`, it
-        # moves on to considering the next utterance.
-        result = response.results[0]
-        if not result.alternatives:
-            continue
-
-        # Display the transcription of the top alternative.
-        transcript = result.alternatives[0].transcript
-
-        # Display interim results, but with a carriage return at the end of the
-        # line, so subsequent lines will overwrite them.
-        #
-        # If the previous result was longer than this one, we need to print
-        # some extra spaces to overwrite the previous result
-        overwrite_chars = ' ' * (num_chars_printed - len(transcript))
-
-        if not result.is_final:
-            print "is_final"
-            sys.stdout.write(transcript + overwrite_chars + '\r')
-            sys.stdout.flush()
-
-            num_chars_printed = len(transcript)
-
-        else:
-            print "non_final"
-            print(transcript + overwrite_chars)
-
-            # Exit recognition if any of the transcribed phrases could be
-            # one of our keywords.
-            if re.search(r'\b(exit|quit)\b', transcript, re.I):
-                print('Exiting..')
-                break
-
-            num_chars_printed = 0
-
-
-def main():
+def recognize(speech_callback = None, mic_callback = None):
     # See http://g.co/cloud/speech/docs/languages
     # for a list of supported languages.
     #language_code = 'en-US'  # a BCP-47 language tag
@@ -150,25 +100,37 @@ def main():
         config=config,
         interim_results=True)
 
+    speech_result = None
     with MicrophoneStream(RATE, CHUNK) as stream:
+        if mic_callback is not None : mic_callback()
         audio_generator = stream.generator()
         requests = (types.StreamingRecognizeRequest(audio_content=content)
                     for content in audio_generator)
 
         responses = client.streaming_recognize(streaming_config, requests)
-
         # Now, put the transcription responses to use.
         #listen_print_loop(responses)
-        result = ''
-        for response in responses :
-            result = response.results[0]
-            transcript = result.alternatives[0].transcript
-            print "transcript : ", transcript, "..."
-            if result.is_final :
-                print "final"
-                stream.__exit__(None, None, None)
-                result = transcript
+        for response in responses:
+            for result in response.results:
+                alternatives = result.alternatives
+                # for alternative in alternatives:
+                #     print('Confidence: {}'.format(alternative.confidence))
+                #     print('Transcript: {}'.format(alternative.transcript.encode('utf8')))
+                alternative = result.alternatives[0]
+                speech_result = SpeechResult(alternative.transcript.encode('utf8'), alternative.confidence, result.is_final)
+                if speech_callback is not None : speech_callback(speech_result)
 
+                if result.is_final is True :
+                    stream.__exit__(None, None, None)
+
+    return speech_result
 
 if __name__ == '__main__':
-	main()
+
+    def speech_callback(speech_result) :
+        print('Confidence: {}'.format(speech_result.confidence))
+        print('Transcript: {}'.format(speech_result.transcript))
+        print "is_final : ", speech_result.isFinal
+        print ""
+
+    result = recognize(speech_callback)
