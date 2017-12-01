@@ -84,8 +84,8 @@ ros.on('connection', function() {
 
 });
 
-ros.connect('ws://192.168.0.2:9090');
-//ros.connect('ws://192.168.112.80:9090');
+//ros.connect('ws://192.168.0.2:9090');
+ros.connect('ws://192.168.0.15:9090');
 
 function makeUserSentenceHtml(sentence) {
   html = "\
