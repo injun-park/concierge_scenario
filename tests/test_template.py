@@ -1,0 +1,54 @@
+import unittest
+from flask import render_template
+from jinja2 import  Environment, PackageLoader, select_autoescape, FileSystemLoader
+
+class TestStringMethods(unittest.TestCase):
+    def test_value(self):
+        import os
+        path, filename = os.path.split("/home/ijpark/catkin_ws/src/concierge/concierge_scenario/tests/test1.html")
+        env = Environment(
+            loader=FileSystemLoader(path),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
+
+        context = {
+            'user' : 'peek'
+        }
+
+        template = env.get_template(filename)
+        merged = template.render(context)
+
+        print merged
+
+    def test_object(self):
+
+        import os
+        path, filename = os.path.split("/home/ijpark/catkin_ws/src/concierge/concierge_scenario/tests/robot_div.html")
+        env = Environment(
+            loader=FileSystemLoader(path),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
+
+        class User :
+            def __init__(self, age, name):
+                self.age = age
+                self.name = name
+
+        users = [
+            User(1, 'first'),
+            User(2, 'second'),
+            User(3, 'third'),
+            User(4, 'fourth')
+        ]
+
+        context = {
+            'my_string' : 'this is my string',
+            'my_intent' : 'my_intent',
+            'users' : users
+        }
+
+        template = env.get_template(filename)
+        print template.render(context)
+
+if __name__ == '__main__':
+    unittest.main()

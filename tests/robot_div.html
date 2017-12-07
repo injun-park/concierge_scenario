@@ -1,0 +1,11 @@
+<div class="container">
+    <img src="/w3images/bandmember.jpg" alt="Avatar" style="width:100%;">
+    <p>my string : {{my_string}}</p>
+    <div class="well well-sg">
+      <p>intent : {{my_intent}}</p>
+        {% for user in users %}
+        name : {{user.name}} age : {{user.age}} <br/>
+        {% endfor %}
+    </div>
+    <span class="time-right">11:00</span>
+</div>
