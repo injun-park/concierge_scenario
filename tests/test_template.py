@@ -1,11 +1,10 @@
 import unittest
-from flask import render_template
 from jinja2 import  Environment, PackageLoader, select_autoescape, FileSystemLoader
 
 class TestStringMethods(unittest.TestCase):
     def test_value(self):
         import os
-        path, filename = os.path.split("/home/ijpark/catkin_ws/src/concierge/concierge_scenario/tests/test1.html")
+        path, filename = os.path.split("./test1.html")
         env = Environment(
             loader=FileSystemLoader(path),
             autoescape=select_autoescape(['html', 'xml'])
@@ -23,7 +22,7 @@ class TestStringMethods(unittest.TestCase):
     def test_object(self):
 
         import os
-        path, filename = os.path.split("/home/ijpark/catkin_ws/src/concierge/concierge_scenario/tests/robot_div.html")
+        path, filename = os.path.split("./robot_div.html")
         env = Environment(
             loader=FileSystemLoader(path),
             autoescape=select_autoescape(['html', 'xml'])

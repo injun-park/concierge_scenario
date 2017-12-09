@@ -23,43 +23,25 @@ class Dialogue :
         self.tts = TTS()
         self.ui = UI_Control()
         self.conversation = Conversation()
-        sentence = "사용자가 감지 되었습니다. 저와 이야기 하고 싶으면 안녕이라고 말씀해주세요. "
+
+    def main(self):
+        self.handleInit()
+
+        finished = False
+        while finished is not True :
+            response = self.getConversationResult()
+            response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
+            rospy.loginfo(response_formatted.encode('utf8'))
+
+    def handleInit(self):
+        self.initialize()
+
+        sentence = "안녕하세요. 만나서 반갑습니다. 저와 이야기 하고 싶으면 안녕~ 이라고 말씀해 주세요."
         self.ui.sendRobotMsg(sentence)
         self.tts.speak(sentence)
 
-    def main(self):
-        is_shutdown = False
-        while is_shutdown is not True:
-            self.initialize()
-            conversation_finish = False
-            try:
-                while conversation_finish is not True:
-                    conversation_result = self.get_converation_result()
-                    response_sentences = conversation_result['output']['text'][0]
-                    self.ui.sendRobotMsg(response_sentences)
-                    self.tts.speak(response_sentences)
 
-                    try:
-                        finish_flag = conversation_result['output']['finish_flag']
-                        if finish_flag is not None and finish_flag == "true": conversation_finish = True
-                    except KeyError as e:
-                        pass
-
-                    try:
-                        entities = conversation_result['entities']
-                        for entity in entities:
-                            if entity['entity'] == "shutdown":
-                                conversation_finish = True
-                                is_shutdown = True
-                    except KeyError as e:
-                        pass
-
-            except CannotDetectUserException as e:
-                self.tts.speak("사용자가 사라졌습니다. 초기 상태로 돌아 갑니다.")
-
-        rospy.loginfo("main loop finish")
-
-    def get_converation_result(self):
+    def getConversationResult(self):
         def mic_callback():
             self.ui.sendUserInputWating()
 
@@ -82,8 +64,27 @@ class Dialogue :
         return aibril_response
 
 
+    def recogSpeech(self):
+        result = None
+        RECOG_LIMIT = 3
+        recogTrial = 0
+        self.stt = SpeechRecognizer()
+        while recogTrial < RECOG_LIMIT :
+            if not self.userDetector.isDetected() :
+                raise CannotDetectUserException()
+
+            self.ui.sendUserInputWating()
+            result = self.stt.recognize()
+            if result.success_flag == result.SUCCESS : break
+            self.tts.speak("음성인식에 실패 하였습니다. 다시 말씀 해 주세요")
+            self.ui.sendRobotMsg("음성인식에 실패 하였습니다. 다시 말씀 해 주세요")
+        self.ui.sendUserMsg("user sentence : " + str(result.sentence))
+        rospy.loginfo("sentence : " + str(result.sentence) +", flag : " + str(result.success_flag))
+        return result
+
+
 if __name__ == "__main__":
-    rospy.init_node('scenario_composer', anonymous=True)
+    rospy.init_node('dialogue_node', anonymous=True)
     dialogue = Dialogue()
     dialogue.main()
     rospy.spin()

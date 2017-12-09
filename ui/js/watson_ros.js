@@ -44,7 +44,8 @@ ros.on('connection', function() {
   listener.subscribe(function(message) {
     //console.log('Received message on ' + listener.name + ': name : ' + message.name +", sentence : " + message.sentence);
     // If desired, we can unsubscribe from the topic as well.
-    console.log("message : " + message.toString())
+    // console.log("message : " + message.toString())
+    // console.log("html : " + message.html);
     console.log('Received message on ' + listener.name + ': command : ' + message.command +", sentence : " + message.sentence +", code : " + message.UI_ROBOT_SENTENCE);
 
 
@@ -55,10 +56,7 @@ ros.on('connection', function() {
 
     command = message.command;
     sentence = message.sentence;
-
-    if (command == 0) {
-      return;
-    }
+    ui_template = message.html;
 
     var myDiv = document.getElementById('scrollingChat');
     html = myDiv.innerHTML;
@@ -67,16 +65,21 @@ ros.on('connection', function() {
     html = html.replace('</blink>', '');
     html = html.replace('<marquee>', '');
     html = html.replace('</marquee>', '');
-    if(command == 10) { /* display user sentence */
-      html += makeUserSentenceHtml(sentence);
+    // if(command == 10) { /* display user sentence */
+    //   html += makeUserSentenceHtml(sentence);
+    //
+    // } else if(command == 20) { /* display watson sentence */
+    //   html += makeWatsonSentenceHtml(sentence);
+    // } else if(command == 30) { /* display MIC */
+    //   html += makeMicListeningHtml();
+    // }
 
-    } else if(command == 20) { /* display watson sentence */
-      html += makeWatsonSentenceHtml(sentence);
-    } else if(command == 30) { /* display MIC */
-      html += makeMicListeningHtml();
-    }
+    html += ui_template;
+
     myDiv.innerHTML = html
     myDiv.scrollTop = myDiv.scrollHeight;
+
+    console.log("innnerHTML : " + myDiv.innerHTML);
 
     //startBlink();
 
@@ -85,7 +88,8 @@ ros.on('connection', function() {
 });
 
 //ros.connect('ws://192.168.0.2:9090');
-ros.connect('ws://192.168.0.15:9090');
+//ros.connect('ws://192.168.0.15:9090');
+ros.connect('ws://127.0.0.1:9090');
 
 function makeUserSentenceHtml(sentence) {
   html = "\

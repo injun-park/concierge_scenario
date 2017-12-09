@@ -58,4 +58,4 @@ class TTS :
 if __name__ == "__main__" :
     rospy.init_node("tts", anonymous=True)
     tts = TTS()
-    tts.speak('안녕하시렵니까.')
+    tts.speak('친구들 놀려 먹는데 엄청 좋아해요...')
