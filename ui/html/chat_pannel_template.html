@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Hello, world!</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <title>Bootstrap Theme Company</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="../node_modules/eventemitter2/lib/eventemitter2.js"></script>
+    <script src="../node_modules/roslib/build/roslib.js"></script>
+    <script src="../js/watson_ros.js"></script>
+    <style>
+    body {
+        margin: 0 auto;
+        max-width: 820px;
+        padding: 0 20px;
+    }
+
+
+    .mygrid-wrapper-div {
+       border: solid #d0cdcc 1px;
+       background-color: #eeeae9;
+       overflow: auto;
+       height: 600px;
+       width : 100%;
+    }
+
+    .container {
+        border: 2px solid #dedede;
+        background-color: #BCA9F5;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+        width: 100%
+    }
+
+    .darker {
+        border-color: #ccc;
+        background-color: #F6CED8;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    .mic {
+        border-color: #cee1df;
+        background-color: #dff2f0;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    .aibril_info {
+        border-color: #aad8a4;
+        background-color: #c2f4bc;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+
+    .container::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    .container img {
+        float: left;
+        max-width: 60px;
+        width: 100%;
+        margin-right: 20px;
+        border-radius: 50%;
+    }
+
+    .container img.right {
+        float: right;
+        margin-left: 20px;
+        margin-right:0;
+    }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="page-header">
+      <h3>Conversation chatting pannel</h3>
+    </div>
+    <div class="mygrid-wrapper-div" id="scrollingChat">
+        <!-- chat contents -->
+        <!-- chat contents -->
+        <!-- chat contents -->
+        <!-- chat contents -->
+
+    </div>
+    </br>
+
+    <form class="form-horizontal">
+      <div class="well well-sm">
+       <div class="form-group">
+         <h4><label class="control-label col-sm-3" for="email"><span class="label label-primary"> Text Input</label></h4>
+         <div class="col-sm-5">
+           <input type="text" class="form-control" id="usr">
+         </div>
+         <div class="col-sm-3">
+           <input type="button" class="btn btn-primary" value="submit" id="usr">
+         </div>
+       </div>
+      </div>
+   </form>
+
+   <div class="well well-sm">
+     <div id="statusIndicator" style="margin-left:20px; margin-top:10px">
+       <p id="connecting"> Connecting to rosbridge...  </p>
+       <p id="connected" style="color:#00D600; display:none"> Connected  </p>
+       <p id="error" style="color:#FF0000; display:none"> Error in the backend!  </p>
+       <p id="closed" style="display:none"> Connection closed.  </p>
+     </div>
+   </div>
+
+
+  </body>
+</html>

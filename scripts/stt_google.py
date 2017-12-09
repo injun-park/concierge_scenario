@@ -135,7 +135,21 @@ def listen_print_loop(responses):
             num_chars_printed = 0
 
 
-def main():
+def recognize(**kwargs) :
+
+    micCallback = None
+    sentenceCallback = None
+
+    try :
+        micCallback = kwargs['mic_callback']
+    except KeyError as e :
+        micCallback = None
+
+    try :
+        sentenceCallback = kwargs['sentence_callback']
+    except KeyError as e :
+        sentenceCallback = None
+
     # See http://g.co/cloud/speech/docs/languages
     # for a list of supported languages.
     #language_code = 'en-US'  # a BCP-47 language tag
@@ -151,6 +165,7 @@ def main():
         interim_results=True)
 
     with MicrophoneStream(RATE, CHUNK) as stream:
+        if micCallback is not None : micCallback()
         audio_generator = stream.generator()
         requests = (types.StreamingRecognizeRequest(audio_content=content)
                     for content in audio_generator)
@@ -163,12 +178,14 @@ def main():
         for response in responses :
             result = response.results[0]
             transcript = result.alternatives[0].transcript
-            print "transcript : ", transcript, "..."
+            if sentenceCallback is not None : sentenceCallback(transcript)
             if result.is_final :
-                print "final"
                 stream.__exit__(None, None, None)
                 result = transcript
 
+    return result
+
 
 if __name__ == '__main__':
-	main()
+    result = recognize()
+    print result

@@ -30,12 +30,28 @@ class UI_Control :
 
         self.publisher.publish(msg)
 
+    def sendAibrilMsg(self, aibril_response):
+        context = {
+            'intents' : aibril_response['intents'],
+            'entities' : aibril_response['entities'],
+            'sentence' : aibril_response['output']['text'][0]
+        }
+
+        template = self.env.get_template("robot_saying.html")
+        merged = template.render(context)
+
+        msg = ui_msg()
+        msg.html = merged
+
+        self.waitSubscribers()
+        self.publisher.publish(msg)
+
     def sendRobotMsg(self, sentence):
         msg = ui_msg()
         # msg.reserved = 0
         # msg.command = msg.UI_ROBOT_SENTENCE
         # msg.sentence = sentence
-        sentence = unicode(sentence, 'utf-8')
+        #sentence = unicode(sentence, 'utf-8')
         context = {
             'sentence' : sentence
         }
@@ -54,6 +70,14 @@ class UI_Control :
         msg.command = msg.UI_USER_SENTENCE
         msg.sentence = sentence
 
+        context = {
+            "sentence" : sentence
+        }
+        template = self.env.get_template("user_saying.html")
+        merged = template.render(context)
+        msg.html = merged
+
+        self.waitSubscribers()
         self.publisher.publish(msg)
 
     def sendUserInputWating(self):
@@ -61,6 +85,11 @@ class UI_Control :
         msg.reserved = 0
         msg.command = msg.UI_WAIT_USER_INPUT
         msg.sentence = ''
+
+        context = {}
+        template = self.env.get_template("mic_animation.html")
+        merged = template.render(context)
+        msg.html = merged
 
         self.publisher.publish(msg)
 

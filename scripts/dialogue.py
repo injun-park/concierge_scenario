@@ -32,55 +32,65 @@ class Dialogue :
             response = self.getConversationResult()
             response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
             rospy.loginfo(response_formatted.encode('utf8'))
+            self.handleAibrilResponse(response)
+            self.checkShutdown(response)
+            if self.checkFinishFlag(response):
+                self.tts.speak(("현재 대화 세션을 종료 하고, 초기 상태로 돌아갑니다."))
+                self.handleInit()
+
+    def checkFinishFlag(self, response):
+        try :
+            finish_flag = response['output']['finish_flag']
+            if finish_flag is not None and finish_flag == "true": return True
+        except KeyError as e :
+            return False
 
     def handleInit(self):
         self.initialize()
 
-        sentence = "안녕하세요. 만나서 반갑습니다. 저와 이야기 하고 싶으면 안녕~ 이라고 말씀해 주세요."
-        self.ui.sendRobotMsg(sentence)
+        sentence = "안녕하세요. 만나서 반갑습니다. 저와 이야기 하고 싶으면 안녕 이라고 말씀해 주세요."
+        self.ui.sendRobotMsg(unicode(sentence, 'utf-8'))
         self.tts.speak(sentence)
+
+
+    def handleAibrilResponse(self, response):
+        self.ui.sendAibrilMsg(response)
+        self.tts.speak(response['output']['text'][0])
 
 
     def getConversationResult(self):
         def mic_callback():
+
             self.ui.sendUserInputWating()
 
         #
         # speech callback function
         #
         def speech_callback(speech_result):
-            print('Confidence: {}'.format(speech_result.confidence))
-            print('Transcript: {}'.format(speech_result.transcript))
-            print "is_final : ", speech_result.isFinal
+            # print('Confidence: {}'.format(speech_result.confidence))
+            # print('Transcript: {}'.format(speech_result.transcript))
+            # print "is_final : ", speech_result.isFinal
+            self.ui.sendUserMsg(speech_result)
             print ""
 
-            self.ui.sendUserMsg(speech_result.transcript)
+            #self.ui.sendUserMsg(speech_result.transcript)
 
-        speech_result = stt_google.recognize(speech_callback, mic_callback)
-        aibril_response = self.conversation.getResponse(speech_result.transcript)
-        response_formatted = json.dumps(aibril_response, indent=2, ensure_ascii=False)
+        speech_result = stt_google.recognize(mic_callback=mic_callback, sentence_callback=speech_callback)
+        self.ui.sendUserMsg(speech_result)
+
+        response = self.conversation.getResponse(speech_result)
+        response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
         rospy.loginfo(response_formatted.encode('utf8'))
 
-        return aibril_response
+        #import  aibril_response
+        #response = aibril_response.AibrilResponse.newInstance(response)
+        return response
 
-
-    def recogSpeech(self):
-        result = None
-        RECOG_LIMIT = 3
-        recogTrial = 0
-        self.stt = SpeechRecognizer()
-        while recogTrial < RECOG_LIMIT :
-            if not self.userDetector.isDetected() :
-                raise CannotDetectUserException()
-
-            self.ui.sendUserInputWating()
-            result = self.stt.recognize()
-            if result.success_flag == result.SUCCESS : break
-            self.tts.speak("음성인식에 실패 하였습니다. 다시 말씀 해 주세요")
-            self.ui.sendRobotMsg("음성인식에 실패 하였습니다. 다시 말씀 해 주세요")
-        self.ui.sendUserMsg("user sentence : " + str(result.sentence))
-        rospy.loginfo("sentence : " + str(result.sentence) +", flag : " + str(result.success_flag))
-        return result
+    def checkShutdown(self, response):
+        entities = response['entities']
+        for entity in entities:
+            if entity['entity'] == "shutdown":
+                sys.exit(1)
 
 
 if __name__ == "__main__":

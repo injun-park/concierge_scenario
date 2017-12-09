@@ -4,8 +4,43 @@
     <img src="/w3images/bandmember.jpg" alt="Avatar">
     <p> {{ sentence }} </p>
     <div class="well well-sg">
-      <p>#intents : my intents</p>
-      <p>@entities : blabla</p>
+        <div class="container aibril_info">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#Intent Name</th>
+                <th>Intent Value</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for intent in intents %}
+              <tr>
+                <td><span class="badge"><h4>{{ intent['intent'] }} </h4> </span></td>
+                <td><h4>{{ intent['confidence'] }}</h4></td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="container aibril_info">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>@Entity Name</th>
+                <th>Entity Value</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for entity in entities %}
+              <tr>
+                <td><span class="badge"><h4>{{ entity['entity'] }} </h4> </span></td>
+                <td> <h4> {{ entity['value'] }} </h4> </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
     </div>
     <span class="time-right">11:00</span>
 </div>
