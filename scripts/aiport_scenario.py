@@ -15,7 +15,7 @@ from ui_control import UI_Control
 class RequestHandler :
     def __init__(self): pass
 
-class Dialogue :
+class AirportConcierge :
     def __init__(self):
         pass
 
@@ -23,9 +23,9 @@ class Dialogue :
         self.tts = TTS()
         self.ui = UI_Control()
         self.conversation = Conversation(
-            username='ee7353c0-8f48-49d3-b747-00057699ef18',
-            password='ra8Z4w4qxrNd',
-            workspace_id='3796d990-daf5-4dc7-b30b-a06e98f423a8'
+            username='e4b29b57-c38e-47cd-b89d-c65485756d56',
+            password='bHYBxAVxOW3l',
+            workspace_id='b291e39c-254a-46f5-80d9-b3f63fa0c58f'
         )
 
     def main(self):
@@ -36,8 +36,8 @@ class Dialogue :
             response = self.getConversationResult()
             response_formatted = json.dumps(response, indent=2, ensure_ascii=False)
             rospy.loginfo(response_formatted.encode('utf8'))
-            self.handleAibrilResponse(response)
             self.checkShutdown(response)
+            self.handleAibrilResponse(response)
             if self.checkFinishFlag(response):
                 self.tts.speak(("현재 대화 세션을 종료 하고, 초기 상태로 돌아갑니다."))
                 self.handleInit()
@@ -99,6 +99,6 @@ class Dialogue :
 
 if __name__ == "__main__":
     rospy.init_node('dialogue_node', anonymous=True)
-    dialogue = Dialogue()
-    dialogue.main()
+    scenario = AirportConcierge()
+    scenario.main()
     rospy.spin()

@@ -31,10 +31,32 @@ class UI_Control :
         self.publisher.publish(msg)
 
     def sendAibrilMsg(self, aibril_response):
+
+        response_examples = []
+
+        intents = aibril_response['intents']
+        for intent in intents :
+            if intent['intent'] == 'hello' :
+                response_examples.append(unicode('게이트안내', 'utf-8'))
+                response_examples.append(unicode('편의시설안내', 'utf-8'))
+                response_examples.append(unicode('운항정보 안내', 'utf-8'))
+                response_examples.append(unicode('도착지 정보안내', 'utf-8'))
+            elif intent['intent'] == 'convenient_facilities_guide' :
+                response_examples.append(unicode('환전소', 'utf-8'))
+                response_examples.append(unicode('은행', 'utf-8'))
+                response_examples.append(unicode('커피숍', 'utf-8'))
+                response_examples.append(unicode('편의점', 'utf-8'))
+                response_examples.append(unicode('면세점', 'utf-8'))
+                response_examples.append(unicode('식당', 'utf-8'))
+                response_examples.append(unicode('로밍', 'utf-8'))
+                response_examples.append(unicode('흡연실', 'utf-8'))
+
+
         context = {
             'intents' : aibril_response['intents'],
             'entities' : aibril_response['entities'],
-            'sentence' : aibril_response['output']['text'][0]
+            'sentence' : aibril_response['output']['text'][0],
+            'response_examples' : response_examples
         }
 
         template = self.env.get_template("robot_saying.html")

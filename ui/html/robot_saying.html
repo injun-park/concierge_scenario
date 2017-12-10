@@ -9,7 +9,7 @@
             <thead>
               <tr>
                 <th>#Intent Name</th>
-                <th>Intent Value</th>
+                <th>Intent confidence</th>
               </tr>
             </thead>
             <tbody>
@@ -39,8 +39,15 @@
             {% endfor %}
             </tbody>
           </table>
-
         </div>
+    </div>
+    <div class="well well-sg">
+      <h4> response example </h4>
+      <div class="container response_example">
+          {% for response_example in response_examples %}
+            <div class="btn btn btn-info"> <h4>{{ response_example}}</h4></div>
+          {% endfor %}
+      </div>
     </div>
     <span class="time-right">11:00</span>
 </div>

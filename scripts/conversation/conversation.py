@@ -5,16 +5,34 @@ import json
 from watson_developer_cloud import ConversationV1
 
 class Conversation :
-    def __init__(self):
+    def __init__(self, **kwargs):
+
+        self.username = ''
+        self.password = ''
+        self.workspaceId = ''
+        self.version = '2017-05-26'
+        self.url = auth.url
+
+        try : self.username = kwargs['username']
+        except KeyError as e : self.username = ''
+
+        try : self.password = kwargs['password']
+        except KeyError as e : self.password = ''
+
+        try : self.workspace_id = kwargs['workspace_id']
+        except KeyError as e : self.workspace_id=''
+
+
+
         self.conversatin = ConversationV1(
-          username="ee7353c0-8f48-49d3-b747-00057699ef18",
-          password="ra8Z4w4qxrNd",
+          username=self.username,
+          password=self.password,
           version='2017-05-26',
           url = auth.url
         )
 
-        self.workspace_id = auth.workspace_id
         self.context = {}
+
 
     def getResponse(self, input):
         response = self.conversatin.message(
