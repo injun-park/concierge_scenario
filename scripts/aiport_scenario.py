@@ -38,16 +38,6 @@ class AirportConcierge :
             rospy.loginfo(response_formatted.encode('utf8'))
             self.checkShutdown(response)
             self.handleAibrilResponse(response)
-            if self.checkFinishFlag(response):
-                self.tts.speak(("현재 대화 세션을 종료 하고, 초기 상태로 돌아갑니다."))
-                self.handleInit()
-
-    def checkFinishFlag(self, response):
-        try :
-            finish_flag = response['output']['finish_flag']
-            if finish_flag is not None and finish_flag == "true": return True
-        except KeyError as e :
-            return False
 
     def handleInit(self):
         self.initialize()
@@ -59,7 +49,9 @@ class AirportConcierge :
 
     def handleAibrilResponse(self, response):
         self.ui.sendAibrilMsg(response)
-        self.tts.speak(response['output']['text'][0])
+        text = None
+        for text in response['output']['text'] :
+            self.tts.speak(text)
 
 
     def getConversationResult(self):
@@ -94,6 +86,7 @@ class AirportConcierge :
         entities = response['entities']
         for entity in entities:
             if entity['entity'] == "shutdown":
+                self.tts.speak('프로그램을 종료 합니다.')
                 sys.exit(1)
 
 

@@ -49,5 +49,18 @@ class TestStringMethods(unittest.TestCase):
         template = env.get_template(filename)
         print template.render(context)
 
+
+    def test_array(self):
+        a = [1, 2, 3]
+        if 1 in a : self.assertTrue(True)
+        else : self.assertTrue(False)
+
+        a = ['a', 'abc', 'def']
+        if 'abc' in a :
+            self.assertTrue(True)
+
+        if 'adbdefg' in a :
+            self.assertTrue(False)
+
 if __name__ == '__main__':
     unittest.main()
